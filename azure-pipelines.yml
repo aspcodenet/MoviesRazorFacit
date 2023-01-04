@@ -15,3 +15,27 @@ variables:
 steps:
 - script: dotnet build --configuration $(buildConfiguration)
   displayName: 'dotnet build $(buildConfiguration)'
+- task: DotNetCoreCLI@2
+  inputs:
+    command: test
+    projects: '**/*Tests/*.csproj'
+    arguments: '--configuration $(buildConfiguration)'
+    buildProperties: 
+
+- task: DotNetCoreCLI@2
+  inputs:
+    command: publish
+    publishWebProjects: True
+    arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)'
+    zipAfterPublish: True    
+
+- task: AzureRmWebAppDeployment@4
+  inputs:
+    ConnectionType: 'AzureRM'
+    azureSubscription: 'Pay-As-You-Go(2c139570-55fd-4633-b5b8-3fe50d920f8c)'
+    appType: 'webAppLinux'
+    WebAppName: 'stefantestar123456'
+    packageForLinux: '$(Build.ArtifactStagingDirectory)/*.zip'
+    RuntimeStack: 'DOTNETCORE|6.0'
+    
+    
